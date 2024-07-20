@@ -1,0 +1,21 @@
+# Ignore les fichiers objets et exécutables
+*.o
+*.exe
+
+# Ignore le répertoire 'obj' qui contient des fichiers objets
+obj/
+
+# Ignore le répertoire 'data' qui contient des fichiers de données sensibles
+data/
+
+# Ignore les fichiers de sauvegarde d'éditeurs de texte courants
+*~
+*.swp
+
+# Ignore les fichiers de logs éventuels
+*.log
+
+# Ignore les dossiers et fichiers spécifiques aux IDEs et éditeurs
+.vscode/
+.idea/
+*.code-workspace

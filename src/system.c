@@ -155,14 +155,14 @@ void checkAllAccounts(struct User u)
         {
             printf("_____________________\n");
             printf("\nAccount number:%d\nDeposit Date:%d/%d/%d \ncountry:%s \nPhone number:%d \nAmount deposited: $%.2f \nType Of Account:%s\n",
-                   r.accountNbr,
-                   r.deposit.day,
-                   r.deposit.month,
-                   r.deposit.year,
-                   r.country,
-                   r.phone,
-                   r.amount,
-                   r.accountType);
+                r.accountNbr,
+                r.deposit.day,
+                r.deposit.month,
+                r.deposit.year,
+                r.country,
+                r.phone,
+                r.amount,
+                r.accountType);
         }
     }
     fclose(pf);
@@ -170,28 +170,65 @@ void checkAllAccounts(struct User u)
 }
 
 void updateaccountinformation() {
+    #define MAX_LINE_LENGTH 200
     int id;
     int choice;
+    char newPhoneNumber[15];
+    char newCountry[50];
+    char line[MAX_LINE_LENGTH];
+    int accountFound = 0;
 
     printf("What is the account number you want to change: ");
-    scanf("%d", &id);  // Use %d for integers and pass the address of the variable
+    scanf("%d", &id);
 
-    printf("\nWhich information you want to update:\n1 -> phone number\n2 -> country\n");
-    scanf("%d", &choice);  // Use %d for integers and pass the address of the variable
+    printf("\nWhich information do you want to update:\n1 -> phone number\n2 -> country\n");
+    scanf("%d", &choice);
 
-    // Example handling based on the choice
-    if (choice == 1) {
-        system("clear");
-        printf("Enter the new phone number %d.\n", id);
-        
-        // Add logic to update phone number
-    } else if (choice == 2) {
-        system("clear");
-        printf(" Enter the new country %d.\n", id);
-        
-        // Add logic to update country
-    } else {
-        printf("Invalid choice.\n");
+    FILE *file = fopen(RECORDS, "r");
+    FILE *tempFile = fopen("temp.txt", "w");
 
+    if (file == NULL || tempFile == NULL) {
+        perror("Error opening file");
+        return;
     }
+
+    while (fgets(line, sizeof(line), file)) {
+        int fileId;
+        char name[50], date[20], country[50], phoneNumber[15], otherData[100];
+        double balance;
+        int otherId1, otherId2;
+
+        sscanf(line, "%d %d %s %d %s %s %s %lf %s", &fileId, &otherId1, name, &otherId2, date, country, phoneNumber, &balance, otherData);
+
+        if (fileId == id) {
+            accountFound = 1;
+            if (choice == 1) {
+                printf("Enter the new phone number: ");
+                scanf("%s", newPhoneNumber);
+                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, country, newPhoneNumber, balance, otherData);
+                printf("Phone number updated to: %s\n", newPhoneNumber);
+            } else if (choice == 2) {
+                printf("Enter the new country: ");
+                scanf("%s", newCountry);
+                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
+                printf("Country updated to: %s\n", newCountry);
+            } else {
+                printf("Invalid choice.\n");
+                fprintf(tempFile, "%s", line);
+            }
+        } else {
+            fprintf(tempFile, "%s", line);
+        }
+    }
+
+    if (!accountFound) {
+        printf("Account with ID %d not found.\n", id);
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    remove(RECORDS);
+    rename("temp.txt", RECORDS);
 }
+
