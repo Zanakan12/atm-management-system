@@ -1,4 +1,5 @@
 #include "header.h"
+#include <stdbool.h>
 
 const char *RECORDS = "./data/records.txt";
 
@@ -191,27 +192,29 @@ void updateaccountinformation() {
         perror("Error opening file");
         return;
     }
-
+    bool myBoolean = true;
     while (fgets(line, sizeof(line), file)) {
         int fileId;
         char name[50], date[20], country[50], phoneNumber[15], otherData[100];
         double balance;
         int otherId1, otherId2;
-
+        
         sscanf(line, "%d %d %s %d %s %s %s %lf %s", &fileId, &otherId1, name, &otherId2, date, country, phoneNumber, &balance, otherData);
 
         if (fileId == id) {
             accountFound = 1;
-            if (choice == 1) {
+            if (choice == 1 && myBoolean) {
                 printf("Enter the new phone number: ");
                 scanf("%s", newPhoneNumber);
                 fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, country, newPhoneNumber, balance, otherData);
                 printf("Phone number updated to: %s\n", newPhoneNumber);
-            } else if (choice == 2) {
+                myBoolean = false;
+            } else if (choice == 2 && myBoolean) {
                 printf("Enter the new country: ");
                 scanf("%s", newCountry);
                 fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
                 printf("Country updated to: %s\n", newCountry);
+                myBoolean = false;
             } else {
                 printf("Invalid choice.\n");
                 fprintf(tempFile, "%s", line);
@@ -219,6 +222,7 @@ void updateaccountinformation() {
         } else {
             fprintf(tempFile, "%s", line);
         }
+        
     }
 
     if (!accountFound) {
@@ -231,4 +235,3 @@ void updateaccountinformation() {
     remove(RECORDS);
     rename("temp.txt", RECORDS);
 }
-
