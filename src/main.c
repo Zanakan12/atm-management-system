@@ -62,7 +62,8 @@ void initMenu(struct User *u) {
         switch (option) {
             case 1:
                 loginMenu(u->name, u->password);
-                if (strcmp(u->password, getPassword(*u)) == 0) {
+                const char* stored_password = getPassword(*u);
+                if (stored_password && strcmp(u->password, stored_password) == 0) {
                     printf("\n\nPassword Match!");
                 } else {
                     printf("\nWrong password!! or User Name\n");
