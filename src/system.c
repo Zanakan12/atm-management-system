@@ -1,10 +1,14 @@
 #include "header.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
-const char *RECORDS = "./data/records.txt";
+#define MAX_LINE_LENGTH 200
 
-int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
-{
+int getAccountFromFile(FILE *ptr, char name[50], struct Record *r) {
     return fscanf(ptr, "%d %d %s %d %d/%d/%d %s %d %lf %s",
                 &r->id,
 		        &r->userId,
@@ -19,12 +23,11 @@ int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
                 r->accountType) != EOF;
 }
 
-void saveAccountToFile(FILE *ptr, struct User u, struct Record r)
-{
+void saveAccountToFile(FILE *ptr, struct User u, struct Record r) {
     fprintf(ptr, "%d %d %s %d %d/%d/%d %s %d %.2lf %s\n\n",
             r.id,
             u.id,
-            u.name,  // Assumant que name est un tableau de caractères
+            u.name,
             r.accountNbr,
             r.deposit.month,
             r.deposit.day,
@@ -35,12 +38,42 @@ void saveAccountToFile(FILE *ptr, struct User u, struct Record r)
             r.accountType);
 }
 
+int countLinesInFile(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        return -1;
+    }
 
-void stayOrReturn(int notGood, void f(struct User u), struct User u)
-{
+    int lines = 0;
+    char ch;
+    while (!feof(file)) {
+        ch = fgetc(file);
+        if (ch == '\n') {
+            lines++;
+        }
+    }
+
+    fclose(file);
+    return lines;
+}
+
+void printCentered(const char *text) {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    int width = w.ws_col;
+    int textLen = strlen(text);
+    int padding = (width - textLen) / 2;
+
+    for (int i = 0; i < padding; i++) {
+        printf(" ");
+    }
+    printf("%s\n", text);
+}
+
+void stayOrReturn(int notGood, void f(struct User u), struct User u) {
     int option;
-    if (notGood == 0)
-    {
+    if (notGood == 0) {
         system("clear");
         printf("\n✖ Record not found!!\n");
     invalid:
@@ -52,56 +85,41 @@ void stayOrReturn(int notGood, void f(struct User u), struct User u)
             mainMenu(u);
         else if (option == 2)
             exit(0);
-        else
-        {
+        else {
             printf("Insert a valid operation!\n");
             goto invalid;
         }
-    }
-    else
-    {
+    } else {
         printf("\nEnter 1 to go to the main menu and 0 to exit:");
         scanf("%d", &option);
     }
-    if (option == 1)
-    {
+    if (option == 1) {
         system("clear");
         mainMenu(u);
-    }
-    else
-    {
+    } else {
         system("clear");
         exit(1);
     }
 }
 
-void success(struct User u)
-{
+void success(struct User u) {
     int option;
     printf("\n✔ Success!\n\n");
 invalid:
     printf("Enter 1 to go to the main menu and 0 to exit!\n");
     scanf("%d", &option);
     system("clear");
-    if (option == 1)
-    {
+    if (option == 1) {
         mainMenu(u);
-    }
-    else if (option == 0)
-    {
+    } else if (option == 0) {
         exit(1);
-    }
-    else
-    {
+    } else {
         printf("Insert a valid operation!\n");
         goto invalid;
     }
 }
 
-
-
-void createNewAcc(struct User u)
-{
+void createNewAcc(struct User u) {
     struct Record r;
     struct Record cr;
     char userName[50];
@@ -110,17 +128,13 @@ void createNewAcc(struct User u)
 noAccount:
     system("clear");
     printf("\t\t\t===== New record =====\n");
-    printf("Enter username: ");
-    scanf("%49s", userName); // Use %49s to prevent buffer overflow
     printf("\nEnter today's date(mm/dd/yyyy):");
     scanf("%d/%d/%d", &r.deposit.month, &r.deposit.day, &r.deposit.year);
     printf("\nEnter the account number:");
     scanf("%d", &r.accountNbr);
 
-    while (getAccountFromFile(pf, userName, &cr))
-    {
-        if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr)
-        {
+    while (getAccountFromFile(pf, userName, &cr)) {
+        if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr) {
             printf("✖ This Account already exists for this user\n\n");
             goto noAccount;
         }
@@ -140,8 +154,7 @@ noAccount:
     success(u);
 }
 
-void checkAllAccounts(struct User u)
-{
+void checkAllAccounts(struct User u) {
     char userName[100];
     struct Record r;
 
@@ -149,11 +162,8 @@ void checkAllAccounts(struct User u)
 
     system("clear");
     printf("\t\t====== All accounts from user, %s =====\n\n", u.name);
-    while (getAccountFromFile(pf, userName, &r))
-    {
-        
-        if (strcmp(userName, u.name) != 0)
-        {
+    while (getAccountFromFile(pf, userName, &r)) {
+        if (strcmp(userName, u.name) != 0) {
             printf("_____________________\n");
             printf("\nAccount number:%d\nDeposit Date:%d/%d/%d \ncountry:%s \nPhone number:%d \nAmount deposited: $%.2f \nType Of Account:%s\n",
                 r.accountNbr,
@@ -171,7 +181,6 @@ void checkAllAccounts(struct User u)
 }
 
 void updateaccountinformation() {
-    #define MAX_LINE_LENGTH 200
     int id;
     int choice;
     char newPhoneNumber[15];
@@ -234,4 +243,40 @@ void updateaccountinformation() {
 
     remove(RECORDS);
     rename("temp.txt", RECORDS);
+}
+
+void Registration() {
+    system("clear");
+    struct User u;
+    char name[50] = {0}; // Array to store name
+    char pwd[50] = {0};  // Array to store password
+
+    FILE *file = fopen(USERS, "a");
+    if (file == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
+    int line = countLinesInFile(USERS);
+    if (line == -1) {
+        perror("Failed to read the file");
+        fclose(file);
+        return;
+    }
+
+    printCentered("Bank Management System\n");
+    printCentered("Enter your desired username: ");
+    scanf("%49s", name); // Use %49s to prevent buffer overflow
+
+    printCentered("Enter your desired password: ");
+    scanf("%49s", pwd);
+
+    strcpy(u.name, name);
+    strcpy(u.password, pwd);
+    u.id = line;
+
+    fprintf(file, "%d %s %s\n", u.id, u.name, u.password);
+
+    fclose(file);
+    printCentered("User registered successfully.\n");
 }

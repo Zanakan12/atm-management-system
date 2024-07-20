@@ -1,59 +1,38 @@
-#include <termios.h>
 #include "header.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-char *USERS = "./data/users.txt";
+const char *USERS = "./data/users.txt";
+const char *RECORDS = "./data/records.txt";
 
-void loginMenu(char a[50], char pass[50])
-{
-    struct termios oflags, nflags;
+void loginMenu(char name[50], char password[50]) {
+    printf("Enter your username: ");
+    scanf("%49s", name);
+    printf("Enter your password: ");
+    scanf("%49s", password);
+}
 
-    system("clear");
-    printf("\n\n\n\t\t\t\t   Bank Management System\n\t\t\t\t\t User Login:");
-    scanf("%s", a);
+void registerMenu(char name[50], char password[50]) {
+    printf("Enter your username: ");
+    scanf("%49s", name);
+    printf("Enter your password: ");
+    scanf("%49s", password);
+}
 
-    // disabling echo
-    tcgetattr(fileno(stdin), &oflags);
-    nflags = oflags;
-    nflags.c_lflag &= ~ECHO;
-    nflags.c_lflag |= ECHONL;
-
-    if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0)
-    {
-        perror("tcsetattr");
-        return exit(1);
-    }
-    printf("\n\n\n\n\n\t\t\t\tEnter the password to login:");
-    scanf("%s", pass);
-
-    // restore terminal
-    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0)
-    {
-        perror("tcsetattr");
-        return exit(1);
-    }
-};
-
-const char *getPassword(struct User u)
-{
-    FILE *fp;
-    struct User userChecker;
-
-    if ((fp = fopen("./data/users.txt", "r")) == NULL)
-    {
-        printf("Error! opening file");
-        exit(1);
-    }
-
-    while (fscanf(fp, "%s %s", userChecker.name, userChecker.password) != EOF)
-    {
-        if (strcmp(userChecker.name, u.name) == 0)
-        {
-            fclose(fp);
-            char *buff = userChecker.password;
-            return buff;
+const char* getPassword(struct User u) {
+    static char password[50];
+    FILE *file = fopen(USERS, "r");
+    char line[100];
+    while (fgets(line, sizeof(line), file)) {
+        char stored_name[50], stored_password[50];
+        sscanf(line, "%s %s", stored_name, stored_password);
+        if (strcmp(stored_name, u.name) == 0) {
+            strcpy(password, stored_password);
+            fclose(file);
+            return password;
         }
     }
-
-    fclose(fp);
-    return "no user found";
+    fclose(file);
+    return NULL;
 }

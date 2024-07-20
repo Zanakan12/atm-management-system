@@ -1,15 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef HEADER_H
+#define HEADER_H
 
-struct Date
-{
+#include <stdio.h>
+
+extern const char *USERS;
+extern const char *RECORDS;
+
+struct Date {
     int month, day, year;
 };
 
-// all fields for each record of an account
-struct Record
-{
+// All fields for each record of an account
+struct Record {
     int id;
     int userId;
     char name[100];
@@ -22,20 +24,27 @@ struct Record
     struct Date withdraw;
 };
 
-struct User
-{
+struct User {
     int id;
     char name[50];
     char password[50];
 };
 
-// authentication functions
-void loginMenu(char a[50], char pass[50]);
-void registerMenu(char a[50], char pass[50]);
+// Authentication functions
+void loginMenu(char name[50], char pass[50]);
+void registerMenu(char name[50], char pass[50]);
 const char *getPassword(struct User u);
 
-// system function
+// System functions
 void createNewAcc(struct User u);
 void mainMenu(struct User u);
 void checkAllAccounts(struct User u);
 void updateaccountinformation();
+void Registration();
+int getAccountFromFile(FILE *ptr, char name[50], struct Record *r);
+void saveAccountToFile(FILE *ptr, struct User u, struct Record r);
+void stayOrReturn(int notGood, void f(struct User u), struct User u);
+void success(struct User u);
+int countLinesInFile(const char *filename);
+
+#endif
