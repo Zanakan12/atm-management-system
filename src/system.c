@@ -10,7 +10,7 @@
 
 // Function to read an account from a file
 int getAccountFromFile(FILE *ptr, char name[50], struct Record *r) {
-    return fscanf(ptr, "%d %d %s %d %d/%d/%d %s %d %lf %s",
+    return fscanf(ptr, "\n%d %d %s %d %d/%d/%d %s %d %lf %s",
                 &r->id,
 		        &r->userId,
 		        name,
@@ -145,13 +145,23 @@ noAccount:
     printf("\nEnter the account number:");
     scanf("%d", &r.accountNbr);
 
+    bool accountExists = false;
     fseek(pf, 0, SEEK_SET);  // Reset file pointer to start for reading
     while (getAccountFromFile(pf, userName, &cr)) {
-        if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr) {
-            printf("✖ This Account already exists for this user\n\n");
-            goto noAccount;
+        if (strcmp(userName, u.name) == 0) {
+            u.id = cr.userId;  // Set u.id to the userId of the first found account
+            if (cr.accountNbr == r.accountNbr) {
+                printf("✖ This Account already exists for this user\n\n");
+                goto noAccount;
+            }
+            accountExists = true;
         }
     }
+    if (!accountExists) {
+        int lineCount = countLinesInFile(RECORDS);
+        u.id = (lineCount == -1) ? 0 : lineCount;  // Set new user ID
+    }
+
     printf("\nEnter the country:");
     scanf("%s", r.country);
     printf("\nEnter the phone number:");
@@ -316,6 +326,7 @@ void Registration() {
 
     fclose(file);
     printCentered("User registered successfully.\n");
+    loginMenu(name,pwd);
 }
 
 // Function to check if a username is already used
