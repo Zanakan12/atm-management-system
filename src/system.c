@@ -348,3 +348,35 @@ bool lookforusedname(const char *filename, const char *element) {
     fclose(file);
     return false;  // Return false if the element is not found after reading the entire file
 }
+
+void checkanaccounts() {
+    Record r;
+    FILE *pf = fopen("records.txt", "r");
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
+    int search_account_id;
+    printf("Enter the account id: ");
+    scanf("%d", &search_account_id);
+
+    // Read header if necessary to skip
+    char buffer[256];
+    fgets(buffer, sizeof(buffer), pf);  // Skip header line if your file has one
+
+    while (fscanf(pf, "%d %d %49s %d %10s %49s %ld %lf %49s",
+                  &r.id, &r.user_id, r.username, &r.account_id,
+                  r.date_of_creation, r.country, &r.phone, &r.balance, r.account_type) == 9) {
+        if (r.account_id == search_account_id) {
+            printf("\nID: %d\nUser ID: %d\nUsername: %s\nAccount ID: %d\nDate of Creation: %s\nCountry: %s\nPhone Number: %ld\nBalance: $%.2f\nType of Account: %s\n",
+                   r.id, r.user_id, r.username, r.account_id,
+                   r.date_of_creation, r.country, r.phone, r.balance, r.account_type);
+            fclose(pf);
+            return;  // Exit after finding the account
+        }
+    }
+    printf("Account id %d not found.\n", search_account_id);
+    fclose(pf);
+
+}

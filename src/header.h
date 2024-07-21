@@ -47,4 +47,5 @@ void stayOrReturn(int notGood, void f(struct User u), struct User u);
 void success(struct User u);
 int countLinesInFile(const char *filename);
 bool lookforusedname(const char *filename, const char *element);
+void checkanaccounts();
 #endif

@@ -26,10 +26,10 @@ void mainMenu(struct User u) {
             updateaccountinformation();
             break;
         case 3:
-            checkAllAccounts(u);
+            checkanaccounts(u);
             break;
         case 4:
-            // checkthedetailsofexistingaccounts(u);
+            checkAllAccounts(u);
             break;
         case 5:
             // maketransaction(u);
