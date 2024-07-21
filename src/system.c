@@ -8,6 +8,7 @@
 
 #define MAX_LINE_LENGTH 200
 
+// Function to read an account from a file
 int getAccountFromFile(FILE *ptr, char name[50], struct Record *r) {
     return fscanf(ptr, "%d %d %s %d %d/%d/%d %s %d %lf %s",
                 &r->id,
@@ -23,8 +24,9 @@ int getAccountFromFile(FILE *ptr, char name[50], struct Record *r) {
                 r->accountType) != EOF;
 }
 
+// Function to save an account to a file
 void saveAccountToFile(FILE *ptr, struct User u, struct Record r) {
-    fprintf(ptr, "%d %d %s %d %d/%d/%d %s %d %.2lf %s\n\n",
+    fprintf(ptr, "\n\n%d %d %s %d %d/%d/%d %s %d %.2lf %s",
             r.id,
             u.id,
             u.name,
@@ -38,6 +40,7 @@ void saveAccountToFile(FILE *ptr, struct User u, struct Record r) {
             r.accountType);
 }
 
+// Function to count the number of lines in a file
 int countLinesInFile(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -57,6 +60,7 @@ int countLinesInFile(const char *filename) {
     return lines;
 }
 
+// Function to print centered text
 void printCentered(const char *text) {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -71,6 +75,7 @@ void printCentered(const char *text) {
     printf("%s\n", text);
 }
 
+// Function to prompt the user to stay or return
 void stayOrReturn(int notGood, void f(struct User u), struct User u) {
     int option;
     if (notGood == 0) {
@@ -102,6 +107,7 @@ void stayOrReturn(int notGood, void f(struct User u), struct User u) {
     }
 }
 
+// Function to indicate success
 void success(struct User u) {
     int option;
     printf("\n✔ Success!\n\n");
@@ -119,11 +125,17 @@ invalid:
     }
 }
 
+// Function to create a new account
 void createNewAcc(struct User u) {
     struct Record r;
     struct Record cr;
     char userName[50];
     FILE *pf = fopen(RECORDS, "a+");
+
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
 
 noAccount:
     system("clear");
@@ -133,6 +145,7 @@ noAccount:
     printf("\nEnter the account number:");
     scanf("%d", &r.accountNbr);
 
+    fseek(pf, 0, SEEK_SET);  // Reset file pointer to start for reading
     while (getAccountFromFile(pf, userName, &cr)) {
         if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr) {
             printf("✖ This Account already exists for this user\n\n");
@@ -148,24 +161,34 @@ noAccount:
     printf("\nChoose the type of account:\n\t-> saving\n\t-> current\n\t-> fixed01(for 1 year)\n\t-> fixed02(for 2 years)\n\t-> fixed03(for 3 years)\n\n\tEnter your choice:");
     scanf("%s", r.accountType);
 
+    fseek(pf, 0, SEEK_END);  // Move file pointer to the end for appending
+    int lineCount = countLinesInFile(RECORDS);
+    r.id = (lineCount == -1) ? 0 : lineCount-1;  // Set r.id based on line count
+
     saveAccountToFile(pf, u, r);
 
     fclose(pf);
     success(u);
 }
 
+// Function to check all accounts
 void checkAllAccounts(struct User u) {
     char userName[100];
     struct Record r;
 
     FILE *pf = fopen(RECORDS, "r");
 
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
     system("clear");
     printf("\t\t====== All accounts from user, %s =====\n\n", u.name);
     while (getAccountFromFile(pf, userName, &r)) {
-        if (strcmp(userName, u.name) != 0) {
+        if (strcmp(userName, u.name) == 0) {
             printf("_____________________\n");
-            printf("\nAccount number:%d\nDeposit Date:%d/%d/%d \ncountry:%s \nPhone number:%d \nAmount deposited: $%.2f \nType Of Account:%s\n",
+            printf("\nAccount number:%d\nDeposit Date:%d/%d/%d \nCountry:%s \nPhone number:%d \nAmount deposited: $%.2f \nType Of Account:%s\n",
                 r.accountNbr,
                 r.deposit.day,
                 r.deposit.month,
@@ -180,6 +203,7 @@ void checkAllAccounts(struct User u) {
     success(u);
 }
 
+// Function to update account information
 void updateaccountinformation() {
     int id;
     int choice;
@@ -245,6 +269,7 @@ void updateaccountinformation() {
     rename("temp.txt", RECORDS);
 }
 
+// Function to handle user registration
 void Registration() {
     system("clear");
     struct User u;
@@ -268,6 +293,18 @@ void Registration() {
     printCentered("Enter your desired username: ");
     scanf("%49s", name); // Use %49s to prevent buffer overflow
 
+    if (lookforusedname(USERS, name)) {
+        system("clear");
+        printCentered("Name used, please try with another name!!!");
+        char exit = '0';
+        while (exit != '1') { 
+            printf("[1]- Register\n[ctrl+c]- Exit\n");
+            scanf(" %c", &exit); 
+        }
+        Registration();
+        return;
+    }
+
     printCentered("Enter your desired password: ");
     scanf("%49s", pwd);
 
@@ -279,4 +316,24 @@ void Registration() {
 
     fclose(file);
     printCentered("User registered successfully.\n");
+}
+
+// Function to check if a username is already used
+bool lookforusedname(const char *filename, const char *element) {
+    char line[1024];
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Erreur lors de l'ouverture du fichier");
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        if (strstr(line, element) != NULL) {
+            fclose(file);
+            return true;  // Return true if the element is found
+        }
+    }
+
+    fclose(file);
+    return false;  // Return false if the element is not found after reading the entire file
 }

@@ -1,6 +1,6 @@
 #ifndef HEADER_H
 #define HEADER_H
-
+#include <stdbool.h>
 #include <stdio.h>
 
 extern const char *USERS;
@@ -46,5 +46,5 @@ void saveAccountToFile(FILE *ptr, struct User u, struct Record r);
 void stayOrReturn(int notGood, void f(struct User u), struct User u);
 void success(struct User u);
 int countLinesInFile(const char *filename);
-
+bool lookforusedname(const char *filename, const char *element);
 #endif
