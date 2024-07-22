@@ -172,8 +172,8 @@ noAccount:
     scanf("%s", r.accountType);
 
     fseek(pf, 0, SEEK_END);  // Move file pointer to the end for appending
-    int lineCount = countLinesInFile(RECORDS);
-    r.id = (lineCount == -1) ? 0 : lineCount-1;  // Set r.id based on line count
+    int lineCount = countLinesInFile(RECORDS)-1;
+    r.id = (lineCount == -1) ? 0 : lineCount;  // Set r.id based on line count
 
     saveAccountToFile(pf, u, r);
 
@@ -214,7 +214,7 @@ void checkAllAccounts(struct User u) {
 }
 
 // Function to update account information
-void updateaccountinformation() {
+void updateaccountinformation(struct User u) {
     int id;
     int choice;
     char newPhoneNumber[15];
@@ -255,7 +255,7 @@ void updateaccountinformation() {
             } else if (choice == 2 && myBoolean) {
                 printf("Enter the new country: ");
                 scanf("%s", newCountry);
-                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
+                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
                 printf("Country updated to: %s\n", newCountry);
                 myBoolean = false;
             } 
@@ -274,6 +274,7 @@ void updateaccountinformation() {
 
     remove(RECORDS);
     rename("temp.txt", RECORDS);
+    success(u);
 }
 
 // Function to handle user registration
@@ -393,22 +394,22 @@ void checkanaccounts(struct User u) {
         double result = (r.amount * 0.04) / 12;
 
         // Afficher le résultat avec printf
-        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+        printf("\n\n-> You will get $ %.2f as interest on %d/%d/%d.\n", result, r.deposit.month, r.deposit.day, r.deposit.year + 1);
 
     }else if (strcmp(r.accountType, "fixed02") == 0) {
 
         // Calculer le résultat
-        double result = (r.amount * 0.05) / 12;
+        double result = (r.amount * 0.05);
 
         // Afficher le résultat avec printf
-        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+        printf("\n\n-> You will get $ %.2f as interest on %d/%d/%d.\n", result, r.deposit.month, r.deposit.day, r.deposit.year + 2);
     }else if (strcmp(r.accountType, "fixed03") == 0) {
 
         // Calculer le résultat
-        double result = (r.amount * 0.08) / 12;
+        double result = (r.amount * 0.08);
 
         // Afficher le résultat avec printf
-        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+        printf("\n\n-> You will get $ %.2f as interest on %d/%d/%d.\n", result*3, r.deposit.month, r.deposit.day, r.deposit.year + 3);
     }else{
         printf("\n\n->You will not get interests because the account is of type current\n");
     }
@@ -419,9 +420,10 @@ void checkanaccounts(struct User u) {
     }
 
     fclose(pf);
+    success(u);
 }
 
-void makeTransaction() {
+void makeTransaction(struct User u) {
     int accountNbr;
     struct Record r;
     int choice;
@@ -442,6 +444,7 @@ void makeTransaction() {
         perror("Temporary file opening failed");
         fclose(pf);
         return;
+        success(u);
     }
 
     while (getAccountFromFile(pf, userName, &r)) {
@@ -495,9 +498,10 @@ void makeTransaction() {
     // Replace original file with updated temporary file
     remove(RECORDS);
     rename("temp.txt", RECORDS);
+    success(u);
 }
 
-void deleteAccount() {
+void deleteAccount(struct User u) {
     int accountNbr;
     struct Record r;
     char userName[50];
@@ -543,9 +547,10 @@ void deleteAccount() {
     // Replace original file with updated temporary file
     remove(RECORDS);
     rename("temp.txt", RECORDS);
+    success(u);
 }
 
-void transferOwner() {
+void transferOwner(struct User u) {
     int accountNbr;
     struct Record r;
     char userName[50];
@@ -599,4 +604,5 @@ void transferOwner() {
     // Replace original file with updated temporary file
     remove(RECORDS);
     rename("temp.txt", RECORDS);
+    success(u);
 }
