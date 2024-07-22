@@ -32,10 +32,10 @@ void mainMenu(struct User u) {
             checkAllAccounts(u);
             break;
         case 5:
-            // maketransaction(u);
+            makeTransaction();
             break;
         case 6:
-            // removeexistingaccount(u);
+            deleteAccount();
             break;
         case 7:
             // transferowner(u);
@@ -80,6 +80,8 @@ void initMenu(struct User *u) {
                 break;
             default:
                 printf("Insert a valid operation!\n");
+                r=1;
+                break;
         }
     }
 }

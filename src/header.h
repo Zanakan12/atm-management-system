@@ -48,4 +48,7 @@ void success(struct User u);
 int countLinesInFile(const char *filename);
 bool lookforusedname(const char *filename, const char *element);
 void checkanaccounts();
+void makeTransaction();
+void writeAccountToFile(FILE *pf, struct Record *r);
+void deleteAccount();
 #endif

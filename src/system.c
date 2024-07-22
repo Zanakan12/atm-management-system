@@ -381,9 +381,166 @@ void checkanaccounts(struct User u) {
         }
     }
 
+    if (strcmp(r.accountType, "saving") == 0) {
+        // Calculer le résultat
+        double result = (r.amount * 0.07) / 12;
+
+        // Afficher le résultat avec printf
+        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+    }else if (strcmp(r.accountType, "fixed01") == 0) {
+
+        // Calculer le résultat
+        double result = (r.amount * 0.04) / 12;
+
+        // Afficher le résultat avec printf
+        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+
+    }else if (strcmp(r.accountType, "fixed02") == 0) {
+
+        // Calculer le résultat
+        double result = (r.amount * 0.05) / 12;
+
+        // Afficher le résultat avec printf
+        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+    }else if (strcmp(r.accountType, "fixed03") == 0) {
+
+        // Calculer le résultat
+        double result = (r.amount * 0.08) / 12;
+
+        // Afficher le résultat avec printf
+        printf("\n\n-> You will get $ %0.2f as interest on day 10 of every month.\n", result);
+    }else{
+        printf("\n\n->You will not get interests because the account is of type current\n");
+    }
+
+
     if (!accountFound) {
         printf("✖ Account with ID %d not found.\n", accountNbr);
     }
 
     fclose(pf);
+}
+
+void makeTransaction() {
+    int accountNbr;
+    struct Record r;
+    int choice;
+    int amount;
+    char userName[50]; // Added userName to pass to the function
+
+    FILE *pf = fopen(RECORDS, "r"); // Open original file in read mode
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
+    printf("Enter the account ID to make transaction: ");
+    scanf("%d", &accountNbr);
+
+    FILE *tempPf = fopen("temp.txt", "w"); // Open temporary file in write mode
+    if (tempPf == NULL) {
+        perror("Temporary file opening failed");
+        fclose(pf);
+        return;
+    }
+
+    while (getAccountFromFile(pf, userName, &r)) {
+        if (r.accountNbr == accountNbr) {
+            printf("Do you want to:\n     1 -> Withdraw\n     2 -> Deposit\n\nEnter your choice: ");
+            scanf("%d", &choice);
+
+            switch (choice) {
+                case 1:
+                    printf("Enter the amount you want to withdraw: $");
+                    scanf("%d", &amount);
+                    if (amount > r.amount) {
+                        printf("✖ Insufficient funds.\n");
+                    } else {
+                        r.amount -= amount;
+                        printf("✓ Withdrawal successful. New balance: %.2f\n", r.amount);
+                        
+                        // Update withdrawal date
+                        printf("Enter the withdrawal date (MM DD YYYY): ");
+                        scanf("%d %d %d", &r.withdraw.month, &r.withdraw.day, &r.withdraw.year);
+                    }
+                    break;
+                
+                case 2:
+                    printf("Enter the amount you want to deposit: $");
+                    scanf("%d", &amount);
+                    r.amount += amount;
+                    printf("✓ Deposit successful. New balance: %.2f\n", r.amount);
+                    
+                    // Update deposit date
+                    printf("Enter the deposit date (MM DD YYYY): ");
+                    scanf("%d %d %d", &r.deposit.month, &r.deposit.day, &r.deposit.year);
+                    break;
+
+                default:
+                    printf("✖ Invalid choice.\n");
+                    break;
+            }
+        }
+
+        // Write the record to the temporary file
+        fprintf(tempPf, "%d %d %s %d %d/%d/%d %s %d %.2f %s\n\n", 
+                r.id, r.userId, userName, r.accountNbr, 
+                r.deposit.month, r.deposit.day, r.deposit.year,
+                r.country, r.phone, r.amount, r.accountType);
+    }
+
+    fclose(pf);
+    fclose(tempPf);
+
+    // Replace original file with updated temporary file
+    remove(RECORDS);
+    rename("temp.txt", RECORDS);
+}
+
+void deleteAccount() {
+    int accountNbr;
+    struct Record r;
+    char userName[50];
+
+    FILE *pf = fopen(RECORDS, "r"); // Open original file in read mode
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
+    FILE *tempPf = fopen("temp.txt", "w"); // Open temporary file in write mode
+    if (tempPf == NULL) {
+        perror("Temporary file opening failed");
+        fclose(pf);
+        return;
+    }
+
+    printf("Enter the account ID to delete: ");
+    scanf("%d", &accountNbr);
+
+    bool accountFound = false;
+
+    while (getAccountFromFile(pf, userName, &r)) {
+        if (r.accountNbr == accountNbr) {
+            accountFound = true;
+            printf("Account with ID %d has been deleted.\n", accountNbr);
+            continue; // Skip writing this record to the temporary file
+        }
+        // Write the remaining records to the temporary file
+        fprintf(tempPf, "%d %d %s %d %d/%d/%d %s %d %.2f %s\n\n", 
+                r.id, r.userId, userName, r.accountNbr, 
+                r.deposit.month, r.deposit.day, r.deposit.year,
+                r.country, r.phone, r.amount, r.accountType);
+    }
+
+    if (!accountFound) {
+        printf("✖ Account with ID %d not found.\n", accountNbr);
+    }
+
+    fclose(pf);
+    fclose(tempPf);
+
+    // Replace original file with updated temporary file
+    remove(RECORDS);
+    rename("temp.txt", RECORDS);
 }
