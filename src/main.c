@@ -38,7 +38,7 @@ void mainMenu(struct User u) {
             deleteAccount();
             break;
         case 7:
-            // transferowner(u);
+            transferOwner();
             break;
         case 8:
             exit(1);

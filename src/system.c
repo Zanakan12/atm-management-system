@@ -544,3 +544,59 @@ void deleteAccount() {
     remove(RECORDS);
     rename("temp.txt", RECORDS);
 }
+
+void transferOwner() {
+    int accountNbr;
+    struct Record r;
+    char userName[50];
+    int newUserId;
+    char newUserName[100];
+    printf("here");
+    FILE *pf = fopen(RECORDS, "r"); // Open original file in read mode
+    if (pf == NULL) {
+        perror("File opening failed");
+        return;
+    }
+
+    FILE *tempPf = fopen("temp.txt", "w"); // Open temporary file in write mode
+    if (tempPf == NULL) {
+        perror("Temporary file opening failed");
+        fclose(pf);
+        return;
+    }
+
+    printf("Enter the account ID to transfer ownership: ");
+    scanf("%d", &accountNbr);
+    printf("Enter the new owner's user ID: ");
+    scanf("%d", &newUserId);
+    printf("Enter the new owner's name: ");
+    scanf("%s", newUserName);
+
+    bool accountFound = false;
+
+    while (getAccountFromFile(pf, userName, &r)) {
+        if (r.accountNbr == accountNbr) {
+            accountFound = true;
+            r.userId = newUserId;
+            strncpy(r.name, newUserName, sizeof(r.name));
+            printf("Ownership of account ID %d has been transferred to %s (User ID: %d).\n", accountNbr, newUserName, newUserId);
+        }
+
+        // Write the record to the temporary file
+        fprintf(tempPf, "\n%d %d %s %d %d/%d/%d %s %d %.2f %s\n", 
+                r.id, r.userId, r.name, r.accountNbr, 
+                r.deposit.month, r.deposit.day, r.deposit.year,
+                r.country, r.phone, r.amount, r.accountType);
+    }
+
+    if (!accountFound) {
+        printf("✖ Account with ID %d not found.\n", accountNbr);
+    }
+
+    fclose(pf);
+    fclose(tempPf);
+
+    // Replace original file with updated temporary file
+    remove(RECORDS);
+    rename("temp.txt", RECORDS);
+}

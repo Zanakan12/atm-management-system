@@ -51,4 +51,5 @@ void checkanaccounts();
 void makeTransaction();
 void writeAccountToFile(FILE *pf, struct Record *r);
 void deleteAccount();
+void transferOwner();
 #endif
