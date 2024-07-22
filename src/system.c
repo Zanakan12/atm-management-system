@@ -556,7 +556,6 @@ void transferOwner(struct User u) {
     char userName[50];
     int newUserId;
     char newUserName[100];
-    printf("here");
     FILE *pf = fopen(RECORDS, "r"); // Open original file in read mode
     if (pf == NULL) {
         perror("File opening failed");
