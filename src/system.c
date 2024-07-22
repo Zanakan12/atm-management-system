@@ -324,6 +324,8 @@ void Registration() {
 
     fclose(file);
     printCentered("User registered successfully.\n");
+    system("clear");
+    printCentered("Let's go to login now");
     loginMenu(name,pwd);
 }
 

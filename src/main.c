@@ -23,7 +23,7 @@ void mainMenu(struct User u) {
             createNewAcc(u);
             break;
         case 2:
-            updateaccountinformation();
+            updateaccountinformation(u);
             break;
         case 3:
             checkanaccounts(u);
@@ -32,13 +32,13 @@ void mainMenu(struct User u) {
             checkAllAccounts(u);
             break;
         case 5:
-            makeTransaction();
+            makeTransaction(u);
             break;
         case 6:
-            deleteAccount();
+            deleteAccount(u);
             break;
         case 7:
-            transferOwner();
+            transferOwner(u);
             break;
         case 8:
             exit(1);
