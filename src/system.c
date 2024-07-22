@@ -244,7 +244,7 @@ void updateaccountinformation() {
         
         sscanf(line, "%d %d %s %d %s %s %s %lf %s", &fileId, &otherId1, name, &otherId2, date, country, phoneNumber, &balance, otherData);
 
-        if (fileId == id) {
+        if (otherId2== id) {
             accountFound = 1;
             if (choice == 1 && myBoolean) {
                 printf("Enter the new phone number: ");
@@ -258,10 +258,7 @@ void updateaccountinformation() {
                 fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
                 printf("Country updated to: %s\n", newCountry);
                 myBoolean = false;
-            } else {
-                printf("Invalid choice.\n");
-                fprintf(tempFile, "%s", line);
-            }
+            } 
         } else {
             fprintf(tempFile, "%s", line);
         }
@@ -349,34 +346,44 @@ bool lookforusedname(const char *filename, const char *element) {
     return false;  // Return false if the element is not found after reading the entire file
 }
 
-void checkanaccounts() {
-    Record r;
-    FILE *pf = fopen("records.txt", "r");
+ // Function to check an account based on account ID
+void checkanaccounts(struct User u) {
+    int accountNbr;
+    struct Record r;
+    char userName[50];
+
+    FILE *pf = fopen(RECORDS, "r");
     if (pf == NULL) {
         perror("File opening failed");
         return;
     }
 
-    int search_account_id;
-    printf("Enter the account id: ");
-    scanf("%d", &search_account_id);
+    printf("Enter the account ID to check: ");
+    scanf("%d", &accountNbr);
 
-    // Read header if necessary to skip
-    char buffer[256];
-    fgets(buffer, sizeof(buffer), pf);  // Skip header line if your file has one
+    bool accountFound = false;
 
-    while (fscanf(pf, "%d %d %49s %d %10s %49s %ld %lf %49s",
-                  &r.id, &r.user_id, r.username, &r.account_id,
-                  r.date_of_creation, r.country, &r.phone, &r.balance, r.account_type) == 9) {
-        if (r.account_id == search_account_id) {
-            printf("\nID: %d\nUser ID: %d\nUsername: %s\nAccount ID: %d\nDate of Creation: %s\nCountry: %s\nPhone Number: %ld\nBalance: $%.2f\nType of Account: %s\n",
-                   r.id, r.user_id, r.username, r.account_id,
-                   r.date_of_creation, r.country, r.phone, r.balance, r.account_type);
-            fclose(pf);
-            return;  // Exit after finding the account
+    while (getAccountFromFile(pf, userName, &r)) {
+        if (r.accountNbr == accountNbr) {
+            printf("\nAccount number: %d\nUser ID: %d\nUser Name: %s\nDeposit Date: %d/%d/%d\nCountry: %s\nPhone number: %d\nAmount deposited: $%.2lf\nType Of Account: %s\n",
+                r.accountNbr,
+                r.userId,
+                userName,
+                r.deposit.day,
+                r.deposit.month,
+                r.deposit.year,
+                r.country,
+                r.phone,
+                r.amount,
+                r.accountType);
+            accountFound = true;
+            break;
         }
     }
-    printf("Account id %d not found.\n", search_account_id);
-    fclose(pf);
 
+    if (!accountFound) {
+        printf("✖ Account with ID %d not found.\n", accountNbr);
+    }
+
+    fclose(pf);
 }
