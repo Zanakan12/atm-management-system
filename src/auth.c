@@ -40,3 +40,23 @@ const char* getPassword(struct User u) {
     fclose(file);
     return NULL;
 }
+
+int getLastIdFromFile(const char* filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("File opening failed");
+        return -1; // Indicate error
+    }
+
+    int lastId = 0;  // Default to 0 if file is empty
+    int id;
+    // Assuming each line starts with an ID followed by other data
+    while (fscanf(file, "%d", &id) == 1) {
+        // Skip to the end of the line
+        fscanf(file, "%*[^\n]");
+        lastId = id;  // Update lastId with the most recent id read
+    }
+
+    fclose(file);
+    return lastId;
+}

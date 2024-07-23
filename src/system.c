@@ -172,9 +172,8 @@ noAccount:
     scanf("%s", r.accountType);
 
     fseek(pf, 0, SEEK_END);  // Move file pointer to the end for appending
-    int lineCount = countLinesInFile(RECORDS)-1;
-    r.id = (lineCount == -1) ? 0 : lineCount;  // Set r.id based on line count
-
+     int lastId = getLastIdFromFile(RECORDS);
+    r.id = lastId + 1;
     saveAccountToFile(pf, u, r);
 
     fclose(pf);
@@ -249,13 +248,13 @@ void updateaccountinformation(struct User u) {
             if (choice == 1 && myBoolean) {
                 printf("Enter the new phone number: ");
                 scanf("%s", newPhoneNumber);
-                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n", fileId, otherId1, name, otherId2, date, country, newPhoneNumber, balance, otherData);
+                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s", fileId, otherId1, name, otherId2, date, country, newPhoneNumber, balance, otherData);
                 printf("Phone number updated to: %s\n", newPhoneNumber);
                 myBoolean = false;
             } else if (choice == 2 && myBoolean) {
                 printf("Enter the new country: ");
                 scanf("%s", newCountry);
-                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s\n\n", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
+                fprintf(tempFile, "%d %d %s %d %s %s %s %.2f %s", fileId, otherId1, name, otherId2, date, newCountry, phoneNumber, balance, otherData);
                 printf("Country updated to: %s\n", newCountry);
                 myBoolean = false;
             } 
@@ -521,7 +520,7 @@ void deleteAccount(struct User u) {
         return;
     }
 
-    printf("Enter the account ID to delete: ");
+    printCentered("Enter the account ID to delete: ");
     scanf("%d", &accountNbr);
 
     bool accountFound = false;

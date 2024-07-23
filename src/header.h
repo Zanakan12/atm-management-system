@@ -52,4 +52,5 @@ void makeTransaction(struct User u);
 void writeAccountToFile(FILE *pf, struct Record *r);
 void deleteAccount(struct User u);
 void transferOwner(struct User u);
+int getLastIdFromFile(const char* filename);
 #endif
